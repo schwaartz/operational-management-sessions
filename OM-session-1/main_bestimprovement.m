@@ -2,7 +2,7 @@ clc
 clear
 
 %% Input datafile and parameters
- inputfilename = sprintf('Chemicals1.xlsx'); 
+ inputfilename = sprintf('Chemicals2.xlsx'); 
 
 % The function reads the necessary info on the data, see inside the function
 % inputexcelfile.m
@@ -80,7 +80,7 @@ tsbest = tsinit;
 
 iter = 1; 
 while iter <= iterlim && comptime < comptimelimit + 0.001
-      %% Local search INSERT + ADJACENT SWAP
+     %% Local search INSERT + ADJACENT SWAP
      %% Insert move with FIRST improvement
      % Randomly select a position to take a part of the sequence with
      % length L
@@ -91,6 +91,18 @@ while iter <= iterlim && comptime < comptimelimit + 0.001
      % Trying before first
      pos2 = 1; 
      while pos2 <= pos1-L + 1 && comptime < comptimelimit + 0.001
+          [scheduletemp, tttemp, tstemp] = insert(jobid, p, d, setup, familycode, schedule, L, pos1, pos2);
+          objtemp =  f(tttemp, tstemp); 
+          insertztemp(1, 1) = pos2;
+          insertztemp(1, 2) = objtmep;
+          insertz = vertcat(interz, insertztemp);
+          pos2 = pos2 + 1;
+          comtime = toc;
+     end
+
+     % Now try after
+     pos2 = pos1 + 2;
+     while pos2 <= njobs + 1 && comptime < comptimelimit + 0.001
           [scheduletemp, tttemp, tstemp] = insert(jobid, p, d, setup, familycode, schedule, L, pos1, pos2);
           objtemp =  f(tttemp, tstemp); 
           insertztemp(1, 1) = pos2;
