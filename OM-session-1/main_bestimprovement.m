@@ -152,39 +152,30 @@ while iter <= iterlim && comptime < comptimelimit + 0.001
       % Swap the job on pos1 with the job on the right, pos2 = pos1 + 1
       pos1 = 1;
       pos2 = pos1 + 1; 
-      adjswapz = zeros(nbjobs-1, 1);
-      updated2 = false;
-      while pos1 <= nbjobs - 1 && comptime < comptimelimit + 0.001
-          [scheduletemp, tttemp, tstemp] = swap(jobid, p, d, setup, familycode, schedule, pos1, pos2); 
-          objtemp =  f(tttemp, tstemp); 
-          adjswapz(pos1) = objtemp;
+      while pos1 <= nbjobs - 1 && updated < 2 && comptime < comptimelimit + 0.001
+      [scheduletemp, tttemp, tstemp] = swap(jobid, p, d, setup, familycode, schedule, pos1, pos2); 
+      objtemp =  f(tttemp, tstemp); 
+          if  objtemp < obj
+              % If the solution is better than the incumbent solution, 
+              % Update the incumbent solution and enter the next iteration
+              % with that. 
+              tt = tttemp; 
+              ts = tstemp; 
+              schedule = scheduletemp; 
+              obj = objtemp;
+              updated = updated + 1;
+                      if obj < objbest
+                         % Check if the solution is better than the best solution
+                         % found so far, or not.
+                         schedulebest = schedule; 
+                         ttbest = tt;
+                         tsbest = ts;
+                         objbest = obj;
+                      end
+          else
           pos1 = pos1 + 1;
           pos2 = pos1 + 1;
-      end
-      [objtemp, pos1] = min(adjswapz);
-      pos2 = pos1 + 1;
-      if objtemp < obj
-          % If the solution is better than the incumbent solution, 
-          % Update the incumbent solution and enter the next iteration
-          % with that. 
-          [scheduletemp, tttemp, tstemp] = swap(jobid, p, d, setup, familycode, schedule, pos1, pos2); 
-          objtemp =  f(tttemp, tstemp);
-          tt = tttemp;
-          ts = tstemp;
-          schedule = scheduletemp;
-          obj = objtemp;
-          updated2 = true;
-              if obj < objbest
-                 % Check if the solution is better than the best solution
-                 % found so far, or not.
-                 schedulebest = schedule;
-                 ttbest = tt;
-                 tsbest = ts;
-                 objbest = obj;
-              end
-      else
-      pos1 = pos1 + 1;
-      pos2 = pos1 + 1;
+          end
       end
       %% Diversification: Exchange sequence move 
       % After the local search, if the incumbent solution is not updated
