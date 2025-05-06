@@ -81,73 +81,47 @@ tsbest = tsinit;
 iter = 1; 
 while iter <= iterlim && comptime < comptimelimit + 0.001
       %% Local search INSERT + ADJACENT SWAP
-      %% Insert move with FIRST improvement
-      % Randomly select a position to take a part of the sequence with
-      % length L
-      pos1 = randi([1, nbjobs]);
-      updated = 0; 
-             % Try inserting from the beginning
-             pos2 = 1; 
-             while pos2 <= pos1-L + 1 && updated < 1 && comptime < comptimelimit + 0.001
-                  [scheduletemp, tttemp, tstemp] = insert(jobid, p, d, setup, familycode, schedule, L, pos1, pos2);
-                  objtemp =  f(tttemp, tstemp); 
-                  if  objtemp < obj
-                  % If the solution is better than the incumbent solution, 
-                  % Update the incumbent solution and enter the next iteration
-                  % with that. 
-                  tt = tttemp; 
-                  ts = tstemp; 
-                  schedule = scheduletemp; 
-                  obj = objtemp;
-                  pos2 = nbjobs + 1;
-                  updated = updated + 1;
-                          if obj < objbest
-                             % Check if the solution is better than the best solution
-                             % found so far, or not.
-                             schedulebest = schedule; 
-                             ttbest = tt;
-                             tsbest = ts;
-                             objbest = obj;
-                          end
-                  else 
-                  % If not, then update the next position to be inserted. Enter the
-                  % next iteration with the current incumbent solution. 
-                  pos2 = pos2 + 1;
-                  end
-                  % Update the clock
-                  comptime = toc;
-             end
-             % If no improvement achieved before, now try after. 
-                pos2 = pos1 + 2;
-                while pos2 <= nbjobs + 1 && updated < 1 && comptime < comptimelimit + 0.001
-                      [scheduletemp, tttemp, tstemp] = insert(jobid, p, d, setup, familycode, schedule, L, pos1, pos2);
-                      objtemp =  f(tttemp, tstemp); 
-                         if  objtemp < obj
-                          % If the solution is better than the incumbent solution, 
-                          % Update the incumbent solution and enter the next iteration
-                          % with that. 
-                          tt = tttemp; 
-                          ts = tstemp; 
-                          schedule = scheduletemp; 
-                          obj = objtemp;
-                          pos2 = nbjobs + 1;
-                          updated = updated + 1; 
-                                  if obj < objbest
-                                     % Check if the solution is better than the best solution
-                                     % found so far, or not.
-                                     schedulebest = schedule; 
-                                     ttbest = tt;
-                                     tsbest = ts;
-                                     objbest = obj;
-                                  end
-                          else 
-                          % If not, then update the next position to be inserted. Enter the
-                          % next iteration with the current incumbent solution. 
-                          pos2 = pos2 + 1;
-                         end
-                         % Update the clock
-                         comptime = toc;
-                end
+     %% Insert move with FIRST improvement
+     % Randomly select a position to take a part of the sequence with
+     % length L
+     rng(iter);
+     pos1 = randi([1, nbjobs]);
+     updated = false; 
+     insertz = [];
+     % Trying before first
+     pos2 = 1; 
+     while pos2 <= pos1-L + 1 && comptime < comptimelimit + 0.001
+          [scheduletemp, tttemp, tstemp] = insert(jobid, p, d, setup, familycode, schedule, L, pos1, pos2);
+          objtemp =  f(tttemp, tstemp); 
+          insertztemp(1, 1) = pos2;
+          insertztemp(1, 2) = objtmep;
+          insertz = vertcat(interz, insertztemp);
+          pos2 = pos2 + 1;
+          comtime = toc;
+     end
+     
+     [objtemp, index] = min(insertz(:, 2));
+     pos2 = insertz(index, 1);
+     if  objtemp < obj
+         % If the solution is better than the incumbent solution, 
+         % Update the incumbent solution and enter the next iteration
+         % with that. 
+         [scheduletemp, tttemp, tstemp] = insert(jobid, p, d, setup, familycode, schedule, L, pos1, pos2);
+         objtemp = f(tttemp, tstemp);
+         tt = tttemp; 
+         ts = tstemp; 
+         schedule = scheduletemp; 
+         obj = objtemp;
+         updated = true;
+         if obj < objbest
+              % Check if the solution is better than the best solution
+              % found so far, or not.
+              schedulebest = schedule; 
+              ttbest = tt;
+              tsbest = ts;
+              objbest = obj;
+         end
+     end 
       %% Adjacent swap move with FIRST improvement
       % Swap the job on pos1 with the job on the right, pos2 = pos1 + 1
       pos1 = 1;
