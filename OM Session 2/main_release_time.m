@@ -2,7 +2,7 @@ clc
 clear
 
 %% Input datafile and parameters
-inputfilename = sprintf('Consumergoods3.xlsx'); 
+ inputfilename = sprintf('Consumergoods3.xlsx'); 
 
 % The function reads the necessary info on the data, see inside the function
 % inputexcelfile.m
@@ -17,11 +17,10 @@ jobseqEDD = sortrows((horzcat(jobid(:, 1), d)), 2);  % EDD
 jobseqSPT = sortrows((horzcat(jobid(:, 1), p)), 2);  % SPT
 jobseqRAND = transpose(randperm(nbjobs, nbjobs));    % Random permutation
 jobseqINORDER = jobid;                               % 1 - 2 - 3 ...
-jobseqINIT = findValidJobSequence(jobid(:, 1), r);   % Required for release times
+jobseqINIT = findValidJobSequence(jobid(:, 1));
 
 % Set the initial sequence
-jobseqinit = jobINIT; 
-
+jobseqinit = jobseqINIT(:, 1); 
 
 %% Evaluation of a job sequence
 % Objective is to minimize z = lambda*total tardiness(TT) + sigma*total setup time(TS)
@@ -48,7 +47,7 @@ f = @(tt, ts) (lambda*sec2week(tt)+sigma*sec2hour(ts)); % for chemicals
 % SCHEDULE array includes the job sequence, setup
 % time required for the job, starting time of the job, completion time of
 % the job, and the tardiness of the job: see inside the function solnevalution.m
-[scheduleinit] = solnevaluation(jobid, p, d, setup, familycode, jobseqinit);
+[scheduleinit] = solnevaluationv2(jobid, r, p, d, setup, familycode, jobseqinit);
 
 % Total tardiness and total setup time in seconds
 ttinit = sum(scheduleinit(:, 5)); 
@@ -90,7 +89,7 @@ while iter <= iterlim && comptime < comptimelimit + 0.001
              % Try inserting from the beginning
              pos2 = 1; 
              while pos2 <= pos1-L + 1 && updated < 1 && comptime < comptimelimit + 0.001
-                  [scheduletemp, tttemp, tstemp] = insert(jobid, p, d, setup, familycode, schedule, L, pos1, pos2);
+                  [scheduletemp, tttemp, tstemp] = insertv2(jobid, p, d, setup, familycode, schedule, L, pos1, pos2);
                   objtemp =  f(tttemp, tstemp); 
                   if  objtemp < obj
                   % If the solution is better than the incumbent solution, 
@@ -156,7 +155,7 @@ while iter <= iterlim && comptime < comptimelimit + 0.001
       adjswapz = zeros(nbjobs-1, 1);
       updated2 = false;
       while pos1 <= nbjobs - 1 && comptime < comptimelimit + 0.001
-          [scheduletemp, tttemp, tstemp] = swap(jobid, p, d, setup, familycode, schedule, pos1, pos2); 
+          [scheduletemp, tttemp, tstemp] = swapv2(jobid, r, p, d, setup, familycode, schedule, pos1, pos2); 
           objtemp =  f(tttemp, tstemp); 
           adjswapz(pos1) = objtemp;
           pos1 = pos1 + 1;
@@ -168,7 +167,7 @@ while iter <= iterlim && comptime < comptimelimit + 0.001
           % If the solution is better than the incumbent solution, 
           % Update the incumbent solution and enter the next iteration
           % with that. 
-          [scheduletemp, tttemp, tstemp] = swap(jobid, p, d, setup, familycode, schedule, pos1, pos2); 
+          [scheduletemp, tttemp, tstemp] = swap(jobid, r, p, d, setup, familycode, schedule, pos1, pos2); 
           objtemp =  f(tttemp, tstemp);
           tt = tttemp;
           ts = tstemp;
@@ -193,7 +192,7 @@ while iter <= iterlim && comptime < comptimelimit + 0.001
       % Randomly generate two positions to exchange the two part of the
       % sequence, you update the incumbent solution REGARDLESS of the new
       % obj value
-      [schedule, tt, ts] = exchangeseq(jobid, p, d, setup, familycode, schedulebest); 
+      [schedule, tt, ts] = exchangeseq(jobid, r, p, d, setup, familycode, schedulebest); 
       obj =  f(tt, ts);
                if obj < objbest
                  % Check if the solution is better than the best solution

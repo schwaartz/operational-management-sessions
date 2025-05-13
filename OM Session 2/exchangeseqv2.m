@@ -1,4 +1,4 @@
-function [schedule, tt, ts] = exchangeseq(jobid, p, d, setup, familycode, schedule)
+function [schedule, tt, ts] = exchangeseqv2(jobid, r, p, d, setup, familycode, schedule)
 
 % Exchanging a part of the sequence with another piece of sequence 
 % Suppose the sequence: 3 - 4 - 2 - 5 - 1 and two distinct random numbers generated: 2 and 4
@@ -30,7 +30,7 @@ temp = vertcat(part2, part1);
 schedule(:, 1) = vertcat(temp, part3); 
 
 %% Evaluate the new schedule and criteria
-[schedule] = solnevaluation(jobid, p, d, setup, familycode, schedule(:, 1));
+[schedule] = solnevaluationv2(jobid, r, p, d, setup, familycode, schedule(:, 1));
  tt = sum(schedule(:, 4));
  ts = sum(schedule(:, 2));
 

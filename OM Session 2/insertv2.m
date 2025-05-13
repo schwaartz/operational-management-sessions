@@ -1,4 +1,4 @@
-function [schedule, tt, ts] = insert(jobid, p, d, setup, familycode, schedule, L, pos1, pos2)
+function [schedule, tt, ts] = insertv2(jobid, r, p, d, setup, familycode, schedule, L, pos1, pos2)
 
 % Inserting a part of the sequence into another place 
 % Suppose the sequence: 3 - 4 - 2 - 5 - 1 - 6, pos1 = 3 and pos2 = 5, and L is 2. 
@@ -68,7 +68,7 @@ else
 end
   
 %% Evalaute the new schedule and criteria 
-[schedule] = solnevaluation(jobid, p, d, setup, familycode, schedule(:, 1));
+[schedule] = solnevaluationv2(jobid, r, p, d, setup, familycode, schedule(:, 1));
 tt = sum(schedule(:, 5));
 ts = sum(schedule(:, 2)); 
 
